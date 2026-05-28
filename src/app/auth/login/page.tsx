@@ -32,12 +32,13 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-950 to-green-800 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="text-4xl mb-2">⚽</div>
-          <CardTitle className="text-2xl">Quiniela Mundial 2026</CardTitle>
-          <CardDescription>Ingresa a tu cuenta</CardDescription>
+    <div className="min-h-screen flex items-center justify-center mundial-gradient p-4">
+      <Card className="w-full max-w-md shadow-2xl border-0">
+        <CardHeader className="text-center pb-4">
+          <div className="text-5xl mb-2">⚽</div>
+          <div className="text-xs font-bold tracking-[0.3em] text-[#C9A84C] uppercase mb-1">FIFA</div>
+          <CardTitle className="text-2xl text-[#8B1538]">Quiniela Mundial 2026</CardTitle>
+          <CardDescription className="flex items-center justify-center gap-1">🇺🇸 🇲🇽 🇨🇦 Ingresa a tu cuenta</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
@@ -64,7 +65,7 @@ export default function LoginPage() {
               />
             </div>
             {error && <p className="text-sm text-red-500">{error}</p>}
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button type="submit" className="w-full bg-[#8B1538] hover:bg-[#6b1028]" disabled={loading}>
               {loading ? 'Entrando...' : 'Entrar'}
             </Button>
           </form>
