@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
-import { Trophy, Target, Flame, AlertCircle, Zap, Calendar, Medal } from 'lucide-react'
+import Link from 'next/link'
+import { Trophy, Target, Flame, AlertCircle, Zap, Calendar, Medal, ChevronRight } from 'lucide-react'
 import { PHASE_LABELS, getFlag } from '@/lib/scoring'
 import type { Profile, Match } from '@/lib/types'
 
@@ -88,8 +89,8 @@ export default async function DashboardPage() {
               <p className="text-sm text-[#9D9491] text-center py-10">Nadie se ha registrado todavía</p>
             ) : leaderboard.map((u, i) => {
               const isMe = u.id === user?.id
-              return (
-                <div key={u.id} className={`flex items-center justify-between px-5 py-3 border-b border-[#F5F4F2] last:border-0 transition-colors ${isMe ? 'bg-[#F5EEF1]' : 'hover:bg-[#FAFAF9]'}`}>
+              const inner = (
+                <div className={`flex items-center justify-between px-5 py-3 border-b border-[#F5F4F2] last:border-0 transition-colors ${isMe ? 'bg-[#F5EEF1]' : 'hover:bg-[#FAFAF9] cursor-pointer'}`}>
                   <div className="flex items-center gap-3">
                     <span className={`w-6 text-center text-sm font-semibold ${i === 0 ? 'text-[#C4982A]' : i === 1 ? 'text-[#9D9491]' : i === 2 ? 'text-[#C4822A]' : 'text-[#C0B8B4]'}`}>
                       {i + 1}
@@ -104,9 +105,15 @@ export default async function DashboardPage() {
                       </div>
                     </div>
                   </div>
-                  <div className="font-semibold text-[#1A1614]">{u.total_points}<span className="text-xs text-[#9D9491] font-normal ml-1">pts</span></div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-[#1A1614]">{u.total_points}<span className="text-xs text-[#9D9491] font-normal ml-1">pts</span></span>
+                    {!isMe && <ChevronRight className="w-3.5 h-3.5 text-[#C0B8B4]" strokeWidth={1.75} />}
+                  </div>
                 </div>
               )
+              return isMe
+                ? <div key={u.id}>{inner}</div>
+                : <Link key={u.id} href={`/players/${u.id}`} className="block">{inner}</Link>
             })}
           </div>
         </div>

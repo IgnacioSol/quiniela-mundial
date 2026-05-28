@@ -11,11 +11,13 @@ export default async function ResultsPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const [{ data: allMatches }, { data: predictions }, { data: specialPred }, { data: specialRes }] = await Promise.all([
+  const [{ data: allMatches }, { data: predictions }, { data: specialPred }, { data: specialRes }, { data: allPredictions }, { data: allProfiles }] = await Promise.all([
     supabase.from('matches').select('*').order('match_date', { ascending: true }),
     supabase.from('predictions').select('*').eq('user_id', user!.id),
     supabase.from('special_predictions').select('*').eq('user_id', user!.id).single(),
     supabase.from('special_results').select('*').eq('id', 1).single(),
+    supabase.from('predictions').select('user_id, match_id, points_earned'),
+    supabase.from('profiles').select('id, name'),
   ])
 
   const finishedGroups = (allMatches || []).filter((m: Match) => m.phase === 'groups' && m.status === 'finished')
@@ -64,25 +66,45 @@ export default async function ResultsPage() {
                       const pred = myPreds.find((p: Prediction) => p.match_id === m.id)
                       const hw = m.home_score! > m.away_score!
                       const aw = m.away_score! > m.home_score!
+                      const matchPreds = (allPredictions || []).filter((p: any) => p.match_id === m.id && p.points_earned !== null)
+                      const acertaron = matchPreds.filter((p: any) => p.points_earned > 0)
+                      const total = matchPreds.length
                       return (
-                        <div key={m.id} className="flex items-center gap-3 px-4 py-3 border-b border-[#F5F4F2] last:border-0">
-                          <span className={`flex-1 text-right text-sm font-medium ${hw ? 'text-[#1A1614]' : 'text-[#9D9491]'}`}>
-                            {getFlag(m.home_team)} {m.home_team}
-                          </span>
-                          <span className="font-semibold text-sm text-[#8B1538] px-2">{m.home_score}–{m.away_score}</span>
-                          <span className={`flex-1 text-sm font-medium ${aw ? 'text-[#1A1614]' : 'text-[#9D9491]'}`}>
-                            {getFlag(m.away_team)} {m.away_team}
-                          </span>
-                          {pred && pred.predicted_home !== -1 && (
-                            <div className="text-right w-16">
-                              <span className={`text-xs font-semibold ${pred.points_earned > 0 ? 'text-green-600' : 'text-[#9D9491]'}`}>
-                                {pred.points_earned > 0 ? '+' : ''}{pred.points_earned}
+                        <div key={m.id} className="px-4 py-3 border-b border-[#F5F4F2] last:border-0">
+                          <div className="flex items-center gap-3">
+                            <span className={`flex-1 text-right text-sm font-medium ${hw ? 'text-[#1A1614]' : 'text-[#9D9491]'}`}>
+                              {getFlag(m.home_team)} {m.home_team}
+                            </span>
+                            <span className="font-semibold text-sm text-[#8B1538] px-2">{m.home_score}–{m.away_score}</span>
+                            <span className={`flex-1 text-sm font-medium ${aw ? 'text-[#1A1614]' : 'text-[#9D9491]'}`}>
+                              {getFlag(m.away_team)} {m.away_team}
+                            </span>
+                            {pred && pred.predicted_home !== -1 && (
+                              <div className="text-right w-16">
+                                <span className={`text-xs font-semibold ${pred.points_earned > 0 ? 'text-green-600' : 'text-[#9D9491]'}`}>
+                                  {pred.points_earned > 0 ? '+' : ''}{pred.points_earned}
+                                </span>
+                                <div className="text-[10px] text-[#C0B8B4]">{pred.predicted_home}–{pred.predicted_away}</div>
+                              </div>
+                            )}
+                            {pred?.predicted_home === -1 && (
+                              <span className="text-xs text-red-400 font-medium w-16 text-right">−1 pen.</span>
+                            )}
+                          </div>
+                          {total > 0 && (
+                            <div className="mt-1.5 flex flex-wrap gap-1 items-center">
+                              <span className="text-[10px] text-[#9D9491]">
+                                {acertaron.length}/{total} acertaron
                               </span>
-                              <div className="text-[10px] text-[#C0B8B4]">{pred.predicted_home}–{pred.predicted_away}</div>
+                              {acertaron.map((p: any) => {
+                                const profile = (allProfiles || []).find((pr: any) => pr.id === p.user_id)
+                                return profile ? (
+                                  <span key={p.user_id} className="text-[10px] bg-green-50 text-green-700 border border-green-100 rounded-full px-2 py-0.5">
+                                    {profile.name.split(' ')[0]}
+                                  </span>
+                                ) : null
+                              })}
                             </div>
-                          )}
-                          {pred?.predicted_home === -1 && (
-                            <span className="text-xs text-red-400 font-medium w-16 text-right">−1 pen.</span>
                           )}
                         </div>
                       )
