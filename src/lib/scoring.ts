@@ -27,12 +27,28 @@ export const PHASE_LABELS: Record<string, string> = {
 }
 
 export const WC2026_TEAMS = [
-  'Argentina', 'Brasil', 'Francia', 'España', 'Inglaterra', 'Alemania',
-  'Portugal', 'Países Bajos', 'Bélgica', 'Italia', 'Uruguay', 'Colombia',
-  'México', 'Estados Unidos', 'Canadá', 'Marruecos', 'Senegal', 'Nigeria',
-  'Costa de Marfil', 'Ghana', 'Egipto', 'Camerún', 'Sudáfrica', 'Túnez',
-  'Japón', 'Corea del Sur', 'Arabia Saudita', 'Irán', 'Australia', 'Qatar',
-  'Indonesia', 'Uzbekistán', 'Chile', 'Ecuador', 'Paraguay', 'Perú',
-  'Venezuela', 'Bolivia', 'Costa Rica', 'Honduras', 'Panamá', 'Jamaica',
-  'Croacia', 'Polonia', 'Serbia', 'Suiza', 'Dinamarca', 'Austria',
+  // Grupo A
+  'México', 'Sudáfrica', 'Corea del Sur', 'República Checa',
+  // Grupo B
+  'Canadá', 'Bosnia y Herzegovina', 'Catar', 'Suiza',
+  // Grupo C
+  'Brasil', 'Marruecos', 'Haití', 'Escocia',
+  // Grupo D
+  'Estados Unidos', 'Paraguay', 'Australia', 'Turquía',
+  // Grupo E
+  'Alemania', 'Curazao', 'Costa de Marfil', 'Ecuador',
+  // Grupo F
+  'Países Bajos', 'Japón', 'Suecia', 'Túnez',
+  // Grupo G
+  'Bélgica', 'Egipto', 'Irán', 'Nueva Zelanda',
+  // Grupo H
+  'España', 'Cabo Verde', 'Arabia Saudita', 'Uruguay',
+  // Grupo I
+  'Francia', 'Senegal', 'Irak', 'Noruega',
+  // Grupo J
+  'Argentina', 'Argelia', 'Austria', 'Jordania',
+  // Grupo K
+  'Portugal', 'RD Congo', 'Uzbekistán', 'Colombia',
+  // Grupo L
+  'Inglaterra', 'Croacia', 'Ghana', 'Panamá',
 ]

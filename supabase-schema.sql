@@ -108,14 +108,18 @@ alter table public.special_results enable row level security;
 alter table public.scoring_config enable row level security;
 alter table public.phase_deadlines enable row level security;
 
--- Profiles: cada uno ve todos, solo edita el suyo
+-- Profiles
+drop policy if exists "Profiles are viewable by authenticated users" on public.profiles;
+drop policy if exists "Users can insert their own profile" on public.profiles;
+drop policy if exists "Users can update their own profile" on public.profiles;
+drop policy if exists "Admins can update any profile" on public.profiles;
+drop policy if exists "Admins can delete profiles" on public.profiles;
 create policy "Profiles are viewable by authenticated users"
   on public.profiles for select using (auth.role() = 'authenticated');
 create policy "Users can insert their own profile"
   on public.profiles for insert with check (auth.uid() = id);
 create policy "Users can update their own profile"
   on public.profiles for update using (auth.uid() = id);
--- Admins pueden actualizar cualquier perfil
 create policy "Admins can update any profile"
   on public.profiles for update
   using (exists (select 1 from public.profiles where id = auth.uid() and is_admin = true));
@@ -123,26 +127,35 @@ create policy "Admins can delete profiles"
   on public.profiles for delete
   using (exists (select 1 from public.profiles where id = auth.uid() and is_admin = true));
 
--- Matches: todos ven, solo admins modifican
+-- Matches
+drop policy if exists "Matches viewable by authenticated" on public.matches;
+drop policy if exists "Admins manage matches" on public.matches;
 create policy "Matches viewable by authenticated"
   on public.matches for select using (auth.role() = 'authenticated');
 create policy "Admins manage matches"
   on public.matches for all
   using (exists (select 1 from public.profiles where id = auth.uid() and is_admin = true));
 
--- Predictions: cada usuario ve las suyas y las de todos (para ranking)
+-- Predictions
+drop policy if exists "Predictions viewable by authenticated" on public.predictions;
+drop policy if exists "Users manage their own predictions" on public.predictions;
+drop policy if exists "Users update their own predictions" on public.predictions;
+drop policy if exists "Admins update prediction points" on public.predictions;
 create policy "Predictions viewable by authenticated"
   on public.predictions for select using (auth.role() = 'authenticated');
 create policy "Users manage their own predictions"
   on public.predictions for insert with check (auth.uid() = user_id);
 create policy "Users update their own predictions"
   on public.predictions for update using (auth.uid() = user_id);
--- Admins pueden actualizar puntos
 create policy "Admins update prediction points"
   on public.predictions for update
   using (exists (select 1 from public.profiles where id = auth.uid() and is_admin = true));
 
 -- Special predictions
+drop policy if exists "Special predictions viewable by authenticated" on public.special_predictions;
+drop policy if exists "Users manage their special predictions" on public.special_predictions;
+drop policy if exists "Users update their special predictions" on public.special_predictions;
+drop policy if exists "Admins update special prediction points" on public.special_predictions;
 create policy "Special predictions viewable by authenticated"
   on public.special_predictions for select using (auth.role() = 'authenticated');
 create policy "Users manage their special predictions"
@@ -153,21 +166,27 @@ create policy "Admins update special prediction points"
   on public.special_predictions for update
   using (exists (select 1 from public.profiles where id = auth.uid() and is_admin = true));
 
--- Special results: todos ven, solo admins modifican
+-- Special results
+drop policy if exists "Special results viewable by authenticated" on public.special_results;
+drop policy if exists "Admins manage special results" on public.special_results;
 create policy "Special results viewable by authenticated"
   on public.special_results for select using (auth.role() = 'authenticated');
 create policy "Admins manage special results"
   on public.special_results for all
   using (exists (select 1 from public.profiles where id = auth.uid() and is_admin = true));
 
--- Scoring config: todos ven, solo admins modifican
+-- Scoring config
+drop policy if exists "Scoring config viewable by authenticated" on public.scoring_config;
+drop policy if exists "Admins manage scoring config" on public.scoring_config;
 create policy "Scoring config viewable by authenticated"
   on public.scoring_config for select using (auth.role() = 'authenticated');
 create policy "Admins manage scoring config"
   on public.scoring_config for update
   using (exists (select 1 from public.profiles where id = auth.uid() and is_admin = true));
 
--- Phase deadlines: todos ven, solo admins modifican
+-- Phase deadlines
+drop policy if exists "Phase deadlines viewable by authenticated" on public.phase_deadlines;
+drop policy if exists "Admins manage phase deadlines" on public.phase_deadlines;
 create policy "Phase deadlines viewable by authenticated"
   on public.phase_deadlines for select using (auth.role() = 'authenticated');
 create policy "Admins manage phase deadlines"
