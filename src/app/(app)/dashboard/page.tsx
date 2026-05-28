@@ -32,8 +32,9 @@ async function getLeaderboard(supabase: Awaited<ReturnType<typeof createClient>>
   return (profiles || []).map(profile => {
     const matchPoints = (predictions || []).filter((p: any) => p.user_id === profile.id).reduce((s: number, p: any) => s + (p.points_earned || 0), 0)
     const sp = (specials || []).find((s: any) => s.user_id === profile.id)
-    const specialPoints = sp ? (sp.champion_points + sp.runner_up_points + sp.top_scorer_points + sp.revelation_player_points + sp.revelation_team_points) : 0
-    return { ...profile, match_points: matchPoints, special_points: specialPoints, total_points: matchPoints + specialPoints }
+    const specialPoints = sp ? (sp.champion_points + sp.runner_up_points + sp.top_scorer_points + (sp.golden_ball_points || 0) + (sp.golden_glove_points || 0) + sp.revelation_player_points) : 0
+    const bonus = profile.bonus_points || 0
+    return { ...profile, match_points: matchPoints, special_points: specialPoints, total_points: matchPoints + specialPoints + bonus }
   }).sort((a, b) => b.total_points - a.total_points)
 }
 
@@ -184,9 +185,13 @@ export default async function DashboardPage() {
                   { label: 'Marcador exacto', value: config.exact_score_points },
                   { label: 'Ganador / Empate', value: config.correct_winner_points },
                   { label: 'Sin pronosticar', value: -1, negative: true },
-                  { label: 'Campeón correcto', value: config.champion_points },
-                  { label: 'Goleador / Revelación', value: config.top_scorer_points },
-                ].map(({ label, value, negative }) => (
+                  { label: 'Campeón', value: config.champion_points },
+                  { label: 'Subcampeón', value: config.runner_up_points },
+                  { label: 'adidas Golden Boot', value: config.top_scorer_points },
+                  { label: 'adidas Golden Ball', value: (config as any).golden_ball_points ?? 10 },
+                  { label: 'adidas Golden Glove', value: (config as any).golden_glove_points ?? 5 },
+                  { label: 'FIFA Best Young Player', value: config.revelation_player_points },
+                ].map(({ label, value, negative }: any) => (
                   <div key={label} className="flex items-center justify-between">
                     <span className="text-sm text-[#6B6460]">{label}</span>
                     <span className={`text-sm font-semibold ${negative ? 'text-red-500' : 'text-[#1A1614]'}`}>

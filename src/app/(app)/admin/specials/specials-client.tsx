@@ -40,7 +40,7 @@ export default function SpecialsClient({ specialResults: initialRes, config: ini
     revelation_team_points: 0,
   })
   const [manualAdj, setManualAdj] = useState<Record<string, number>>(
-    Object.fromEntries(profiles.map(p => [p.id, 0]))
+    Object.fromEntries(profiles.map(p => [p.id, p.bonus_points || 0]))
   )
   const [saving, setSaving] = useState(false)
   const [savingConfig, setSavingConfig] = useState(false)
@@ -101,17 +101,7 @@ export default function SpecialsClient({ specialResults: initialRes, config: ini
     if (isNaN(adj)) return
     setSavingAdj(userId)
     const supabase = createClient()
-
-    // Store manual adjustment in profile (quota_amount field repurposed, or we can add a note)
-    // We'll apply it as a bonus prediction entry (match_id = 0 = bonus)
-    await supabase.from('predictions').upsert({
-      user_id: userId,
-      match_id: 0,
-      predicted_home: 0,
-      predicted_away: 0,
-      points_earned: adj,
-    }, { onConflict: 'user_id,match_id' })
-
+    await supabase.from('profiles').update({ bonus_points: adj }).eq('id', userId)
     setSavingAdj(null)
     setSavedAdj(userId)
     setTimeout(() => setSavedAdj(null), 2000)

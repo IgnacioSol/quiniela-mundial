@@ -398,10 +398,10 @@ export default function PredictionsClient({ matches, predictions, deadlines, spe
             <div className="space-y-3">
               <p className="text-xs font-semibold text-[#6B6460] uppercase tracking-wider">Premios individuales</p>
               {[
-                { key: 'top_scorer', label: 'Bota de Oro — Goleador del torneo', placeholder: 'Nombre del jugador' },
-                { key: 'golden_ball', label: 'Balón de Oro — Mejor jugador del torneo', placeholder: 'Nombre del jugador' },
-                { key: 'golden_glove', label: 'Guante de Oro — Mejor portero', placeholder: 'Nombre del portero' },
-                { key: 'revelation_player', label: 'Mejor Jugador Joven (sub-21)', placeholder: 'Nombre del jugador' },
+                { key: 'top_scorer', label: 'adidas Golden Boot', placeholder: 'Máximo goleador del torneo' },
+                { key: 'golden_ball', label: 'adidas Golden Ball', placeholder: 'Mejor jugador del torneo' },
+                { key: 'golden_glove', label: 'adidas Golden Glove', placeholder: 'Mejor portero del torneo' },
+                { key: 'revelation_player', label: 'FIFA Best Young Player Award', placeholder: 'Mejor jugador sub-21' },
               ].map(field => (
                 <div key={field.key}>
                   <label className="block text-xs font-medium text-[#9D9491] mb-1.5">{field.label}</label>

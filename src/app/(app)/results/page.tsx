@@ -111,8 +111,10 @@ export default async function ResultsPage() {
                   {[
                     { label: 'Campeón', pred: specialPred?.champion, real: specialRes?.champion, pts: specialPred?.champion_points },
                     { label: 'Subcampeón', pred: specialPred?.runner_up, real: specialRes?.runner_up, pts: specialPred?.runner_up_points },
-                    { label: 'Goleador', pred: specialPred?.top_scorer, real: specialRes?.top_scorer, pts: specialPred?.top_scorer_points },
-                    { label: 'Jug. Revelación', pred: specialPred?.revelation_player, real: specialRes?.revelation_player, pts: specialPred?.revelation_player_points },
+                    { label: 'adidas Golden Boot', pred: specialPred?.top_scorer, real: specialRes?.top_scorer, pts: specialPred?.top_scorer_points },
+                    { label: 'adidas Golden Ball', pred: (specialPred as any)?.golden_ball, real: (specialRes as any)?.golden_ball, pts: (specialPred as any)?.golden_ball_points },
+                    { label: 'adidas Golden Glove', pred: (specialPred as any)?.golden_glove, real: (specialRes as any)?.golden_glove, pts: (specialPred as any)?.golden_glove_points },
+                    { label: 'FIFA Best Young Player', pred: specialPred?.revelation_player, real: specialRes?.revelation_player, pts: specialPred?.revelation_player_points },
                     { label: 'Sel. Revelación', pred: specialPred?.revelation_team, real: specialRes?.revelation_team, pts: specialPred?.revelation_team_points },
                   ].map(item => (
                     <div key={item.label} className="flex items-center justify-between py-2 border-b border-[#F5F4F2] last:border-0">

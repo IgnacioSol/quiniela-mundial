@@ -8,6 +8,7 @@ export interface Profile {
   is_admin: boolean
   quota_amount: number
   quota_paid: boolean
+  bonus_points: number
   created_at: string
 }
 
