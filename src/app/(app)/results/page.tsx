@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { getFlag } from '@/lib/scoring'
 import Bracket from '@/components/bracket'
+import GroupStandings from '@/components/group-standings'
 import type { Match, Prediction, PhaseType } from '@/lib/types'
 
 const GROUPS = ['A','B','C','D','E','F','G','H','I','J','K','L']
@@ -19,6 +20,7 @@ export default async function ResultsPage() {
   ])
 
   const finishedGroups = (allMatches || []).filter((m: Match) => m.phase === 'groups' && m.status === 'finished')
+  const allGroupMatches = (allMatches || []).filter((m: Match) => m.phase === 'groups')
   const knockoutMatches = (allMatches || []).filter((m: Match) => m.phase !== 'groups')
   const myPreds = predictions || []
 
@@ -28,8 +30,11 @@ export default async function ResultsPage() {
 
       <Tabs defaultValue="groups">
         <TabsList className="bg-[#f3e8d0] flex flex-wrap h-auto gap-1 p-1">
+          <TabsTrigger value="standings" className="text-xs data-[state=active]:bg-[#8B1538] data-[state=active]:text-white">
+            📊 Grupos
+          </TabsTrigger>
           <TabsTrigger value="groups" className="text-xs data-[state=active]:bg-[#8B1538] data-[state=active]:text-white">
-            Fase de Grupos
+            ⚽ Resultados
           </TabsTrigger>
           <TabsTrigger value="bracket" className="text-xs data-[state=active]:bg-[#8B1538] data-[state=active]:text-white">
             🏆 Llaves
@@ -39,7 +44,12 @@ export default async function ResultsPage() {
           </TabsTrigger>
         </TabsList>
 
-        {/* GRUPOS */}
+        {/* TABLA DE GRUPOS EN VIVO */}
+        <TabsContent value="standings" className="mt-4">
+          <GroupStandings matches={allGroupMatches} />
+        </TabsContent>
+
+        {/* RESULTADOS DE GRUPOS */}
         <TabsContent value="groups" className="mt-4">
           {finishedGroups.length === 0 ? (
             <div className="card-mundial p-8 text-center text-muted-foreground">No hay resultados de grupos todavía</div>

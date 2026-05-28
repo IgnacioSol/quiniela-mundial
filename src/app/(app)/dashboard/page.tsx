@@ -1,8 +1,31 @@
 import { createClient } from '@/lib/supabase/server'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { PHASE_LABELS, getFlag } from '@/lib/scoring'
 import type { Profile, Match } from '@/lib/types'
+
+function calcPersonalStats(myPreds: any[], finishedMatches: any[]) {
+  const finished = finishedMatches.filter(m => m.status === 'finished')
+  const myFinished = myPreds.filter(p => finished.some((m: any) => m.id === p.match_id) && p.predicted_home !== -1)
+  const missed = myPreds.filter(p => p.predicted_home === -1 && finished.some((m: any) => m.id === p.match_id)).length
+  const exact = myFinished.filter(p => p.points_earned >= 2).length
+  const correctWinner = myFinished.filter(p => p.points_earned === 1).length
+  const total = myFinished.length
+  const accuracy = total > 0 ? Math.round(((exact + correctWinner) / total) * 100) : 0
+
+  // Calculate current streak (consecutive positive points, most recent first)
+  const sortedByDate = [...myFinished].sort((a, b) => {
+    const ma = finished.find((m: any) => m.id === a.match_id)
+    const mb = finished.find((m: any) => m.id === b.match_id)
+    return new Date(mb?.match_date || 0).getTime() - new Date(ma?.match_date || 0).getTime()
+  })
+  let streak = 0
+  for (const p of sortedByDate) {
+    if (p.points_earned > 0) streak++
+    else break
+  }
+
+  return { total, exact, correctWinner, missed, accuracy, streak }
+}
 
 type UserScore = Profile & { total_points: number; match_points: number; special_points: number }
 
@@ -32,11 +55,15 @@ export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const [leaderboard, { data: upcomingMatches }, { data: config }] = await Promise.all([
+  const [leaderboard, { data: upcomingMatches }, { data: config }, { data: myPreds }, { data: allMatches }] = await Promise.all([
     getLeaderboard(supabase),
     supabase.from('matches').select('*').eq('status', 'pending').order('match_date', { ascending: true }).limit(6),
     supabase.from('scoring_config').select('*').single(),
+    supabase.from('predictions').select('*').eq('user_id', user!.id),
+    supabase.from('matches').select('id, status, match_date, phase').eq('status', 'finished'),
   ])
+
+  const stats = calcPersonalStats(myPreds || [], allMatches || [])
 
   const currentUserRank = leaderboard.findIndex(u => u.id === user?.id) + 1
   const currentUser = leaderboard.find(u => u.id === user?.id)
@@ -130,6 +157,33 @@ export default async function DashboardPage() {
               ))}
             </div>
           </div>
+
+          {/* Mis estadísticas */}
+          {(allMatches || []).length > 0 && (
+            <div className="card-mundial p-0 overflow-hidden">
+              <div className="bg-[#8B1538] px-5 py-3">
+                <h2 className="text-white font-bold text-base">📊 Mis Estadísticas</h2>
+              </div>
+              <div className="grid grid-cols-2 gap-3 p-4">
+                <div className="bg-[#f8f4f0] rounded-xl p-3 text-center">
+                  <div className="text-2xl font-bold text-[#8B1538]">{stats.accuracy}%</div>
+                  <div className="text-xs text-muted-foreground">Efectividad</div>
+                </div>
+                <div className="bg-[#f8f4f0] rounded-xl p-3 text-center">
+                  <div className="text-2xl font-bold text-green-600">{stats.streak}</div>
+                  <div className="text-xs text-muted-foreground">Racha actual 🔥</div>
+                </div>
+                <div className="bg-[#f8f4f0] rounded-xl p-3 text-center">
+                  <div className="text-2xl font-bold text-[#C9A84C]">{stats.exact}</div>
+                  <div className="text-xs text-muted-foreground">Exactos 🎯</div>
+                </div>
+                <div className="bg-[#f8f4f0] rounded-xl p-3 text-center">
+                  <div className={`text-2xl font-bold ${stats.missed > 0 ? 'text-red-500' : 'text-gray-400'}`}>{stats.missed}</div>
+                  <div className="text-xs text-muted-foreground">Sin pronosticar ⚠️</div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {config && (
             <div className="card-mundial p-0 overflow-hidden">

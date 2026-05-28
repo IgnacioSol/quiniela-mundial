@@ -54,13 +54,29 @@ export default function MatchesClient({ matches: initialMatches, deadlines: init
 
     await supabase.from('matches').update({ home_score: home, away_score: away, status: 'finished' }).eq('id', match.id)
 
-    // recalculate points for all predictions on this match
-    const { data: config } = await supabase.from('scoring_config').select('*').single()
-    const { data: preds } = await supabase.from('predictions').select('*').eq('match_id', match.id)
+    const [{ data: config }, { data: preds }, { data: allUsers }] = await Promise.all([
+      supabase.from('scoring_config').select('*').single(),
+      supabase.from('predictions').select('*').eq('match_id', match.id),
+      supabase.from('profiles').select('id'),
+    ])
+
+    // Recalculate points for users who DID predict
     if (preds && config) {
       for (const pred of preds) {
+        if (pred.predicted_home === -1) continue // already penalized
         const pts = calcMatchPoints(pred.predicted_home, pred.predicted_away, home, away, config)
         await supabase.from('predictions').update({ points_earned: pts }).eq('id', pred.id)
+      }
+    }
+
+    // Apply -1pt penalty to users who did NOT predict
+    const predictedUserIds = new Set((preds || []).map((p: any) => p.user_id))
+    for (const u of (allUsers || [])) {
+      if (!predictedUserIds.has(u.id)) {
+        await supabase.from('predictions').insert({
+          user_id: u.id, match_id: match.id,
+          predicted_home: -1, predicted_away: -1, points_earned: -1,
+        })
       }
     }
 

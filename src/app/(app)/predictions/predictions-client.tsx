@@ -130,6 +130,21 @@ export default function PredictionsClient({ matches, predictions, deadlines, spe
     )
   }
 
+  // Deadline banner: find phase closing within 24h
+  const upcomingDeadline = (() => {
+    const now = new Date()
+    const in24h = new Date(now.getTime() + 24 * 60 * 60 * 1000)
+    for (const dl of deadlines) {
+      if (!dl.is_locked && dl.deadline) {
+        const d = new Date(dl.deadline)
+        if (d > now && d < in24h) {
+          return { phase: PHASE_LABELS[dl.phase as PhaseType], deadline: d }
+        }
+      }
+    }
+    return null
+  })()
+
   const groupMatches = matches.filter(m => m.phase === 'groups')
   const knockoutMatches = matches.filter(m => m.phase !== 'groups')
   const groupsLocked = isPhaseLocked('groups')
@@ -139,6 +154,20 @@ export default function PredictionsClient({ matches, predictions, deadlines, spe
       <div className="flex items-center gap-3">
         <h1 className="text-2xl font-bold text-[#8B1538]">✏️ Mis Pronósticos</h1>
       </div>
+
+      {upcomingDeadline && (
+        <div className="bg-red-50 border-2 border-red-400 rounded-xl p-4 flex items-center gap-3 animate-pulse">
+          <span className="text-2xl">⚠️</span>
+          <div>
+            <div className="font-bold text-red-700">¡Cierre próximo!</div>
+            <div className="text-sm text-red-600">
+              Los pronósticos de <strong>{upcomingDeadline.phase}</strong> cierran a las{' '}
+              <strong>{upcomingDeadline.deadline.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}</strong>.
+              ¡No te quedes sin pronosticar o tendrás -1pt por partido!
+            </div>
+          </div>
+        </div>
+      )}
 
       <Tabs defaultValue="groups">
         <TabsList className="bg-[#f3e8d0] flex flex-wrap h-auto gap-1 p-1">
