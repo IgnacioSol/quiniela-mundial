@@ -113,6 +113,9 @@ export default function PredictionsClient({ matches, predictions, deadlines, spe
   const [saving, setSaving] = useState<number | null>(null)
   const [saved, setSaved] = useState<number | null>(null)
   const [deleting, setDeleting] = useState<number | null>(null)
+  const [savedPredIds, setSavedPredIds] = useState<Set<number>>(
+    () => new Set(predictions.filter(p => p.predicted_home !== -1).map(p => p.match_id))
+  )
   const [savingSpecial, setSavingSpecial] = useState(false)
   const [savedSpecial, setSavedSpecial] = useState(false)
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['A']))
@@ -146,6 +149,7 @@ export default function PredictionsClient({ matches, predictions, deadlines, spe
       predicted_home: Number(pred.home), predicted_away: Number(pred.away), points_earned: 0,
     }, { onConflict: 'user_id,match_id' })
     setSaving(null); setSaved(matchId)
+    setSavedPredIds(s => new Set(s).add(matchId))
     setTimeout(() => setSaved(null), 2500)
   }
 
@@ -154,6 +158,7 @@ export default function PredictionsClient({ matches, predictions, deadlines, spe
     const supabase = createClient()
     await supabase.from('predictions').delete().eq('user_id', userId).eq('match_id', matchId)
     setLocalPreds(p => { const copy = { ...p }; delete copy[matchId]; return copy })
+    setSavedPredIds(s => { const copy = new Set(s); copy.delete(matchId); return copy })
     setDeleting(null)
   }
 
@@ -244,7 +249,7 @@ export default function PredictionsClient({ matches, predictions, deadlines, spe
                     ? <span className="flex items-center justify-center gap-1"><Check className="w-3 h-3" />Listo</span>
                     : 'Guardar'}
                 </button>
-                {existingPred && existingPred.predicted_home !== -1 && (
+                {savedPredIds.has(match.id) && (
                   <button
                     onClick={() => deletePrediction(match.id)}
                     disabled={deleting === match.id}
