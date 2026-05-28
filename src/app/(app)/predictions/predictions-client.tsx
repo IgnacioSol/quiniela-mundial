@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Lock, AlertTriangle, Check, ChevronDown, ChevronUp, Clock } from 'lucide-react'
+import { Lock, AlertTriangle, Check, ChevronDown, ChevronUp, Clock, Trash2 } from 'lucide-react'
 import { PHASE_LABELS, WC2026_TEAMS, getFlag } from '@/lib/scoring'
 import type { Match, Prediction, PhaseDeadline, SpecialPrediction, PhaseType } from '@/lib/types'
 
@@ -112,6 +112,7 @@ export default function PredictionsClient({ matches, predictions, deadlines, spe
   })
   const [saving, setSaving] = useState<number | null>(null)
   const [saved, setSaved] = useState<number | null>(null)
+  const [deleting, setDeleting] = useState<number | null>(null)
   const [savingSpecial, setSavingSpecial] = useState(false)
   const [savedSpecial, setSavedSpecial] = useState(false)
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['A']))
@@ -146,6 +147,14 @@ export default function PredictionsClient({ matches, predictions, deadlines, spe
     }, { onConflict: 'user_id,match_id' })
     setSaving(null); setSaved(matchId)
     setTimeout(() => setSaved(null), 2500)
+  }
+
+  async function deletePrediction(matchId: number) {
+    setDeleting(matchId)
+    const supabase = createClient()
+    await supabase.from('predictions').delete().eq('user_id', userId).eq('match_id', matchId)
+    setLocalPreds(p => { const copy = { ...p }; delete copy[matchId]; return copy })
+    setDeleting(null)
   }
 
   async function saveSpecial() {
@@ -221,19 +230,31 @@ export default function PredictionsClient({ matches, predictions, deadlines, spe
           )}
           {!locked && !isFinished && (
             <>
-              <button
-                onClick={() => savePrediction(match.id)}
-                disabled={saving === match.id}
-                className={`h-7 px-3 rounded-lg text-xs font-medium transition-all w-full ${
-                  isSaved
-                    ? 'bg-green-50 text-green-600 border border-green-100'
-                    : 'bg-[#F5EEF1] text-[#8B1538] hover:bg-[#8B1538] hover:text-white'
-                }`}
-              >
-                {saving === match.id ? '...' : isSaved
-                  ? <span className="flex items-center justify-center gap-1"><Check className="w-3 h-3" />Listo</span>
-                  : 'Guardar'}
-              </button>
+              <div className="flex gap-1 w-full">
+                <button
+                  onClick={() => savePrediction(match.id)}
+                  disabled={saving === match.id}
+                  className={`h-7 px-3 rounded-lg text-xs font-medium transition-all flex-1 ${
+                    isSaved
+                      ? 'bg-green-50 text-green-600 border border-green-100'
+                      : 'bg-[#F5EEF1] text-[#8B1538] hover:bg-[#8B1538] hover:text-white'
+                  }`}
+                >
+                  {saving === match.id ? '...' : isSaved
+                    ? <span className="flex items-center justify-center gap-1"><Check className="w-3 h-3" />Listo</span>
+                    : 'Guardar'}
+                </button>
+                {existingPred && existingPred.predicted_home !== -1 && (
+                  <button
+                    onClick={() => deletePrediction(match.id)}
+                    disabled={deleting === match.id}
+                    className="h-7 w-7 flex items-center justify-center rounded-lg text-[#C0B8B4] hover:bg-red-50 hover:text-red-400 transition-all"
+                    title="Borrar pronóstico"
+                  >
+                    <Trash2 className="w-3 h-3" strokeWidth={1.75} />
+                  </button>
+                )}
+              </div>
               {deadline && msLeft > 0 && (
                 <CountdownPill deadline={deadline} />
               )}
