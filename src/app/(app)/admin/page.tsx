@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent } from '@/components/ui/card'
+import SyncButton from './sync-button'
 
 export default async function AdminDashboard() {
   const supabase = await createClient()
@@ -28,6 +29,7 @@ export default async function AdminDashboard() {
           </div>
         ))}
       </div>
+      <SyncButton />
     </div>
   )
 }
