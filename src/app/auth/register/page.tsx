@@ -4,10 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Trophy } from 'lucide-react'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -19,93 +16,56 @@ export default function RegisterPage() {
 
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault()
-    if (password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres')
-      return
-    }
-    setLoading(true)
-    setError('')
+    if (password.length < 6) { setError('La contraseña debe tener al menos 6 caracteres'); return }
+    setLoading(true); setError('')
     const supabase = createClient()
     const { data, error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { name } },
+      email, password, options: { data: { name } },
     })
-    if (signUpError) {
-      setError(signUpError.message)
-      setLoading(false)
-      return
-    }
+    if (signUpError) { setError(signUpError.message); setLoading(false); return }
     if (data.user) {
-      await supabase.from('profiles').upsert({
-        id: data.user.id,
-        name,
-        email,
-        is_admin: false,
-        quota_amount: 0,
-        quota_paid: false,
-      })
+      await supabase.from('profiles').upsert({ id: data.user.id, name, email, is_admin: false, quota_amount: 0, quota_paid: false })
     }
-    router.push('/dashboard')
-    router.refresh()
+    router.push('/dashboard'); router.refresh()
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center mundial-gradient p-4">
-      <Card className="w-full max-w-md shadow-2xl border-0">
-        <CardHeader className="text-center pb-4">
-          <div className="text-5xl mb-2">⚽</div>
-          <div className="text-xs font-bold tracking-[0.3em] text-[#C9A84C] uppercase mb-1">FIFA</div>
-          <CardTitle className="text-2xl text-[#8B1538]">Quiniela Mundial 2026</CardTitle>
-          <CardDescription className="flex items-center justify-center gap-1">🇺🇸 🇲🇽 🇨🇦 Crea tu cuenta y únete</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleRegister} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Nombre</Label>
-              <Input
-                id="name"
-                placeholder="Tu nombre"
-                value={name}
-                onChange={e => setName(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="tu@email.com"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Contraseña</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Mínimo 6 caracteres"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            {error && <p className="text-sm text-red-500">{error}</p>}
-            <Button type="submit" className="w-full bg-[#8B1538] hover:bg-[#6b1028]" disabled={loading}>
-              {loading ? 'Creando cuenta...' : 'Registrarme'}
-            </Button>
-          </form>
-          <p className="text-center text-sm text-muted-foreground mt-4">
-            ¿Ya tienes cuenta?{' '}
-            <Link href="/auth/login" className="underline text-foreground">
-              Inicia sesión
-            </Link>
-          </p>
-        </CardContent>
-      </Card>
+    <div className="min-h-screen bg-[#FAFAF9] flex flex-col items-center justify-center px-4">
+      <div className="w-full max-w-sm">
+
+        <div className="flex justify-center mb-7">
+          <div className="w-14 h-14 rounded-2xl bg-[#8B1538] flex items-center justify-center"
+            style={{ boxShadow: '0 4px 20px rgba(139,21,56,0.25)' }}>
+            <Trophy className="w-7 h-7 text-white" strokeWidth={1.5} />
+          </div>
+        </div>
+
+        <h1 className="text-[1.6rem] font-semibold tracking-tight text-[#1A1614] text-center leading-tight mb-1.5">
+          Quiniela Mundial 2026
+        </h1>
+        <p className="text-sm text-[#9D9491] text-center mb-8 tracking-wide">
+          Crea tu cuenta y únete a la quiniela.
+        </p>
+
+        <form onSubmit={handleRegister} className="space-y-3">
+          <input placeholder="Tu nombre" value={name} onChange={e => setName(e.target.value)} className="input-p" required />
+          <input type="email" placeholder="Correo electrónico" value={email} onChange={e => setEmail(e.target.value)} className="input-p" required />
+          <input type="password" placeholder="Contraseña (mín. 6 caracteres)" value={password} onChange={e => setPassword(e.target.value)} className="input-p" required />
+          {error && <p className="text-xs text-red-500 text-center">{error}</p>}
+          <button type="submit" className="btn-primary" disabled={loading}>
+            {loading ? 'Creando cuenta...' : 'Crear cuenta'}
+          </button>
+        </form>
+
+        <p className="text-xs text-center mt-4">
+          <span className="text-[#9D9491]">¿Ya tienes cuenta? </span>
+          <Link href="/auth/login" className="text-[#8B1538] font-medium hover:underline">Inicia sesión</Link>
+        </p>
+
+        <p className="text-xs text-[#C0B8B4] text-center mt-12 tracking-widest">
+          — Ignacio Solano M
+        </p>
+      </div>
     </div>
   )
 }

@@ -1,34 +1,31 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { cn } from '@/lib/utils'
+import { LayoutDashboard, Swords, Users, Star } from 'lucide-react'
 
 const adminLinks = [
-  { href: '/admin', label: '📊 Dashboard' },
-  { href: '/admin/matches', label: '🏟️ Partidos' },
-  { href: '/admin/users', label: '👥 Usuarios' },
-  { href: '/admin/specials', label: '⭐ Especiales' },
+  { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/admin/matches', label: 'Partidos', icon: Swords },
+  { href: '/admin/users', label: 'Usuarios', icon: Users },
+  { href: '/admin/specials', label: 'Especiales', icon: Star },
 ]
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
-
   const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', user.id).single()
   if (!profile?.is_admin) redirect('/dashboard')
 
   return (
-    <div className="space-y-4">
-      <div className="card-mundial p-3 flex items-center gap-2 flex-wrap">
-        <span className="text-sm font-bold text-[#8B1538]">⚙️ Admin:</span>
-        {adminLinks.map(link => (
-          <Link
-            key={link.href}
-            href={link.href}
-            className="text-sm px-3 py-1.5 rounded-md bg-[#f3e8d0] hover:bg-[#e8d5c0] font-medium text-[#8B1538] transition-colors"
-          >
-            {link.label}
+    <div className="space-y-5 py-2">
+      <div className="flex items-center gap-1 border-b border-[#E8E3DC] pb-0">
+        <span className="text-xs font-medium text-[#9D9491] px-2 pb-3">Admin</span>
+        {adminLinks.map(({ href, label, icon: Icon }) => (
+          <Link key={href} href={href}
+            className="flex items-center gap-1.5 px-3 py-2.5 text-sm font-medium text-[#6B6460] hover:text-[#1A1614] border-b-2 border-transparent hover:border-[#E8E3DC] transition-all -mb-px">
+            <Icon className="w-3.5 h-3.5" strokeWidth={1.75} />
+            {label}
           </Link>
         ))}
       </div>

@@ -44,43 +44,46 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) * 1.4);
   --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
 :root {
-  --background: #f8f4f0;
-  --foreground: #1a0510;
-  --card: #ffffff;
-  --card-foreground: #1a0510;
-  --popover: #ffffff;
-  --popover-foreground: #1a0510;
+  --background: #FAFAF9;
+  --foreground: #1A1614;
+  --card: #FFFFFF;
+  --card-foreground: #1A1614;
+  --popover: #FFFFFF;
+  --popover-foreground: #1A1614;
   --primary: #8B1538;
-  --primary-foreground: #ffffff;
-  --secondary: #f3e8d0;
+  --primary-foreground: #FFFFFF;
+  --secondary: #F5EEF1;
   --secondary-foreground: #8B1538;
-  --muted: #f3e8d0;
-  --muted-foreground: #7a6050;
-  --accent: #C9A84C;
-  --accent-foreground: #1a0510;
+  --muted: #F5F4F2;
+  --muted-foreground: #6B6460;
+  --accent: #C4982A;
+  --accent-foreground: #FFFFFF;
   --destructive: oklch(0.577 0.245 27.325);
-  --border: #e8d5c0;
-  --input: #e8d5c0;
+  --border: #E8E3DC;
+  --input: #E8E3DC;
   --ring: #8B1538;
   --chart-1: #8B1538;
-  --chart-2: #C9A84C;
-  --chart-3: #2d5a27;
+  --chart-2: #C4982A;
+  --chart-3: #2d6a3f;
   --chart-4: #1a3a7a;
-  --chart-5: #5a2d82;
-  --radius: 0.625rem;
-  --sidebar: #8B1538;
-  --sidebar-foreground: #ffffff;
-  --sidebar-primary: #C9A84C;
-  --sidebar-primary-foreground: #1a0510;
-  --sidebar-accent: #6b1028;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: rgba(255,255,255,0.15);
-  --sidebar-ring: #C9A84C;
+  --chart-5: #6b2d82;
+  --radius: 0.75rem;
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #1A1614;
+  --sidebar-primary: #8B1538;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #F5EEF1;
+  --sidebar-accent-foreground: #8B1538;
+  --sidebar-border: #E8E3DC;
+  --sidebar-ring: #8B1538;
+
+  --shadow-xs: 0 1px 2px rgba(26, 22, 20, 0.05);
+  --shadow-sm: 0 1px 4px rgba(26, 22, 20, 0.07), 0 1px 2px rgba(26, 22, 20, 0.04);
+  --shadow-md: 0 4px 16px rgba(26, 22, 20, 0.08), 0 1px 3px rgba(26, 22, 20, 0.05);
+  --shadow-lg: 0 8px 32px rgba(26, 22, 20, 0.10), 0 2px 8px rgba(26, 22, 20, 0.06);
 }
 
 @layer base {
@@ -89,25 +92,83 @@
   }
   body {
     @apply bg-background text-foreground;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   html {
     @apply font-sans;
   }
 }
 
-/* Mundial gradient utility */
-.mundial-gradient {
-  background: linear-gradient(135deg, #6b1028 0%, #8B1538 40%, #a8192a 70%, #6b1028 100%);
+/* Premium card */
+.card-p {
+  background: #FFFFFF;
+  border: 1px solid #E8E3DC;
+  border-radius: 1rem;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s ease;
+}
+.card-p:hover {
+  box-shadow: var(--shadow-md);
 }
 
-.gold-text {
-  color: #C9A84C;
+/* Section header inside card */
+.card-section {
+  padding: 0.875rem 1.25rem;
+  border-bottom: 1px solid #E8E3DC;
 }
 
-.card-mundial {
-  background: white;
-  border: 1px solid #e8d5c0;
-  border-top: 3px solid #8B1538;
+/* Primary accent bar */
+.accent-bar {
+  width: 3px;
+  height: 1.25rem;
+  background: #8B1538;
+  border-radius: 2px;
+}
+
+/* Input premium */
+.input-p {
+  width: 100%;
+  height: 2.75rem;
+  padding: 0 1rem;
+  border: 1px solid #E8E3DC;
   border-radius: 0.75rem;
-  box-shadow: 0 2px 12px rgba(139, 21, 56, 0.08);
+  background: #FFFFFF;
+  font-size: 0.875rem;
+  color: #1A1614;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  outline: none;
+}
+.input-p::placeholder {
+  color: #9D9491;
+}
+.input-p:focus {
+  border-color: #8B1538;
+  box-shadow: 0 0 0 3px rgba(139, 21, 56, 0.08);
+}
+
+/* Premium button */
+.btn-primary {
+  height: 2.75rem;
+  width: 100%;
+  background: #8B1538;
+  color: #FFFFFF;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+  box-shadow: 0 1px 3px rgba(139, 21, 56, 0.3), 0 1px 2px rgba(139, 21, 56, 0.2);
+  letter-spacing: 0.01em;
+}
+.btn-primary:hover {
+  background: #7a1230;
+  box-shadow: 0 4px 12px rgba(139, 21, 56, 0.25);
+}
+.btn-primary:active {
+  transform: scale(0.99);
+}
+.btn-primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }

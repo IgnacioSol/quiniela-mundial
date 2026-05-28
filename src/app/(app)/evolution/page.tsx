@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
 import EvolutionChart from '@/components/evolution-chart'
-import { getFlag } from '@/lib/scoring'
 
 export default async function EvolutionPage() {
   const supabase = await createClient()
@@ -16,7 +15,6 @@ export default async function EvolutionPage() {
   const matches = finishedMatches || []
   const preds = allPredictions || []
 
-  // Build cumulative evolution data
   const cumulative: Record<string, number> = {}
   users.forEach(u => { cumulative[u.id] = 0 })
 
@@ -33,37 +31,36 @@ export default async function EvolutionPage() {
     }
   })
 
-  // Add starting point at 0
   const startPoint = { label: 'Inicio', ...Object.fromEntries(users.map(u => [u.name, 0])) }
   const fullData = [startPoint, ...chartData]
 
-  // Current ranking for reference
-  const ranking = users.map(u => ({
-    ...u,
-    pts: cumulative[u.id] || 0,
-  })).sort((a, b) => b.pts - a.pts)
-
-  const MEDALS = ['🥇', '🥈', '🥉']
+  const ranking = users.map(u => ({ ...u, pts: cumulative[u.id] || 0 })).sort((a, b) => b.pts - a.pts)
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-[#8B1538]">📈 Evolución de Puntos</h1>
+    <div className="space-y-5 py-2">
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-semibold text-[#1A1614] tracking-tight">Evolución de Puntos</h1>
+        <span className="text-sm text-[#9D9491]">{matches.length} partidos jugados</span>
+      </div>
 
       <EvolutionChart data={fullData} users={users.map(u => u.name)} />
 
-      {/* Mini ranking actual */}
-      <div className="card-mundial overflow-hidden">
-        <div className="bg-[#8B1538] px-5 py-3">
-          <h2 className="text-white font-bold">Posición actual tras {matches.length} partidos</h2>
+      <div className="card-p overflow-hidden">
+        <div className="card-section flex items-center gap-2.5">
+          <div className="accent-bar" />
+          <h2 className="font-semibold text-[#1A1614] text-sm">Posición actual</h2>
         </div>
-        <div className="divide-y divide-[#e8d5c0]">
+        <div>
           {ranking.map((u, i) => (
-            <div key={u.id} className={`flex items-center justify-between px-5 py-3 ${u.id === user?.id ? 'bg-[#f3e8d0]' : ''}`}>
+            <div key={u.id} className={`flex items-center justify-between px-5 py-3 border-b border-[#F5F4F2] last:border-0 ${u.id === user?.id ? 'bg-[#F5EEF1]' : 'hover:bg-[#FAFAF9]'} transition-colors`}>
               <div className="flex items-center gap-3">
-                <span className="text-lg w-7 text-center">{MEDALS[i] || `${i + 1}.`}</span>
-                <span className="font-semibold text-sm">{u.name} {u.id === user?.id && <span className="text-xs text-[#8B1538]">(tú)</span>}</span>
+                <span className={`w-5 text-sm font-semibold ${i === 0 ? 'text-[#C4982A]' : 'text-[#C0B8B4]'}`}>{i + 1}</span>
+                <span className="text-sm font-medium text-[#1A1614]">
+                  {u.name}
+                  {u.id === user?.id && <span className="ml-2 text-xs text-[#8B1538]">tú</span>}
+                </span>
               </div>
-              <span className="font-bold text-xl text-[#8B1538]">{u.pts}</span>
+              <span className="font-semibold text-sm text-[#1A1614]">{u.pts}<span className="text-xs font-normal text-[#9D9491] ml-1">pts</span></span>
             </div>
           ))}
         </div>

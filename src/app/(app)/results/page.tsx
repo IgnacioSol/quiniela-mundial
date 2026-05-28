@@ -1,10 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
-import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { getFlag } from '@/lib/scoring'
 import Bracket from '@/components/bracket'
 import GroupStandings from '@/components/group-standings'
-import type { Match, Prediction, PhaseType } from '@/lib/types'
+import type { Match, Prediction } from '@/lib/types'
 
 const GROUPS = ['A','B','C','D','E','F','G','H','I','J','K','L']
 
@@ -25,75 +24,69 @@ export default async function ResultsPage() {
   const myPreds = predictions || []
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-bold text-[#8B1538]">📊 Resultados</h1>
+    <div className="space-y-5 py-2">
+      <h1 className="text-xl font-semibold text-[#1A1614] tracking-tight">Resultados</h1>
 
-      <Tabs defaultValue="groups">
-        <TabsList className="bg-[#f3e8d0] flex flex-wrap h-auto gap-1 p-1">
-          <TabsTrigger value="standings" className="text-xs data-[state=active]:bg-[#8B1538] data-[state=active]:text-white">
-            📊 Grupos
-          </TabsTrigger>
-          <TabsTrigger value="groups" className="text-xs data-[state=active]:bg-[#8B1538] data-[state=active]:text-white">
-            ⚽ Resultados
-          </TabsTrigger>
-          <TabsTrigger value="bracket" className="text-xs data-[state=active]:bg-[#8B1538] data-[state=active]:text-white">
-            🏆 Llaves
-          </TabsTrigger>
-          <TabsTrigger value="specials" className="text-xs data-[state=active]:bg-[#C9A84C] data-[state=active]:text-black">
-            ⭐ Especiales
-          </TabsTrigger>
+      <Tabs defaultValue="standings">
+        <TabsList className="bg-transparent border-b border-[#E8E3DC] rounded-none p-0 h-auto w-full flex gap-0 justify-start">
+          {[
+            { value: 'standings', label: 'Grupos' },
+            { value: 'groups', label: 'Mis puntos' },
+            { value: 'bracket', label: 'Llaves' },
+            { value: 'specials', label: 'Especiales' },
+          ].map(t => (
+            <TabsTrigger key={t.value} value={t.value}
+              className="rounded-none border-b-2 border-transparent px-4 py-2.5 text-sm font-medium text-[#6B6460] data-[state=active]:text-[#8B1538] data-[state=active]:border-[#8B1538] data-[state=active]:bg-transparent data-[state=active]:shadow-none -mb-px">
+              {t.label}
+            </TabsTrigger>
+          ))}
         </TabsList>
 
-        {/* TABLA DE GRUPOS EN VIVO */}
-        <TabsContent value="standings" className="mt-4">
+        <TabsContent value="standings" className="mt-5">
           <GroupStandings matches={allGroupMatches} />
         </TabsContent>
 
-        {/* RESULTADOS DE GRUPOS */}
-        <TabsContent value="groups" className="mt-4">
+        <TabsContent value="groups" className="mt-5">
           {finishedGroups.length === 0 ? (
-            <div className="card-mundial p-8 text-center text-muted-foreground">No hay resultados de grupos todavía</div>
+            <div className="card-p p-10 text-center text-sm text-[#9D9491]">No hay resultados todavía</div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
               {GROUPS.map(group => {
-                const gMatches = finishedGroups.filter((m: Match) => m.group_name === group)
-                if (gMatches.length === 0) return null
+                const gm = finishedGroups.filter((m: Match) => m.group_name === group)
+                if (gm.length === 0) return null
                 return (
-                  <div key={group}>
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-7 h-7 mundial-gradient rounded-full flex items-center justify-center text-white font-bold text-xs shadow">{group}</div>
-                      <span className="text-sm font-bold text-[#8B1538]">Grupo {group}</span>
+                  <div key={group} className="card-p overflow-hidden">
+                    <div className="card-section flex items-center gap-2.5">
+                      <div className="w-6 h-6 rounded-full bg-[#8B1538] flex items-center justify-center text-white text-xs font-bold">{group}</div>
+                      <span className="text-sm font-semibold text-[#1A1614]">Grupo {group}</span>
                     </div>
-                    <div className="space-y-2">
-                      {gMatches.map((match: Match) => {
-                        const pred = myPreds.find((p: Prediction) => p.match_id === match.id)
-                        const homeWins = match.home_score! > match.away_score!
-                        const awayWins = match.away_score! > match.home_score!
-                        return (
-                          <div key={match.id} className="card-mundial p-3">
-                            <div className="flex items-center gap-2">
-                              <span className={`flex-1 text-right text-sm font-semibold ${homeWins ? 'text-[#8B1538]' : ''}`}>
-                                {getFlag(match.home_team)} {match.home_team}
+                    {gm.map((m: Match) => {
+                      const pred = myPreds.find((p: Prediction) => p.match_id === m.id)
+                      const hw = m.home_score! > m.away_score!
+                      const aw = m.away_score! > m.home_score!
+                      return (
+                        <div key={m.id} className="flex items-center gap-3 px-4 py-3 border-b border-[#F5F4F2] last:border-0">
+                          <span className={`flex-1 text-right text-sm font-medium ${hw ? 'text-[#1A1614]' : 'text-[#9D9491]'}`}>
+                            {getFlag(m.home_team)} {m.home_team}
+                          </span>
+                          <span className="font-semibold text-sm text-[#8B1538] px-2">{m.home_score}–{m.away_score}</span>
+                          <span className={`flex-1 text-sm font-medium ${aw ? 'text-[#1A1614]' : 'text-[#9D9491]'}`}>
+                            {getFlag(m.away_team)} {m.away_team}
+                          </span>
+                          {pred && pred.predicted_home !== -1 && (
+                            <div className="text-right w-16">
+                              <span className={`text-xs font-semibold ${pred.points_earned > 0 ? 'text-green-600' : 'text-[#9D9491]'}`}>
+                                {pred.points_earned > 0 ? '+' : ''}{pred.points_earned}
                               </span>
-                              <span className="font-bold text-[#8B1538] text-base px-1">{match.home_score}–{match.away_score}</span>
-                              <span className={`flex-1 text-sm font-semibold ${awayWins ? 'text-[#8B1538]' : ''}`}>
-                                {getFlag(match.away_team)} {match.away_team}
-                              </span>
-                              {pred && (
-                                <Badge className={pred.points_earned >= 2 ? 'bg-green-600' : pred.points_earned === 1 ? 'bg-yellow-500 text-black' : 'bg-gray-300 text-gray-700'}>
-                                  {pred.points_earned}pts
-                                </Badge>
-                              )}
+                              <div className="text-[10px] text-[#C0B8B4]">{pred.predicted_home}–{pred.predicted_away}</div>
                             </div>
-                            {pred && (
-                              <div className="text-xs text-center text-muted-foreground mt-1">
-                                Tu pronóstico: {pred.predicted_home}–{pred.predicted_away}
-                              </div>
-                            )}
-                          </div>
-                        )
-                      })}
-                    </div>
+                          )}
+                          {pred?.predicted_home === -1 && (
+                            <span className="text-xs text-red-400 font-medium w-16 text-right">−1 pen.</span>
+                          )}
+                        </div>
+                      )
+                    })}
                   </div>
                 )
               })}
@@ -101,37 +94,37 @@ export default async function ResultsPage() {
           )}
         </TabsContent>
 
-        {/* LLAVES */}
-        <TabsContent value="bracket" className="mt-4">
+        <TabsContent value="bracket" className="mt-5">
           <Bracket matches={knockoutMatches} />
         </TabsContent>
 
-        {/* ESPECIALES */}
-        <TabsContent value="specials" className="mt-4">
-          <div className="card-mundial overflow-hidden">
-            <div className="bg-[#C9A84C] px-5 py-3">
-              <h2 className="font-bold text-[#1a0510]">⭐ Pronósticos Especiales</h2>
+        <TabsContent value="specials" className="mt-5">
+          <div className="card-p overflow-hidden">
+            <div className="card-section">
+              <h3 className="font-semibold text-[#1A1614] text-sm">Pronósticos Especiales</h3>
             </div>
-            <div className="p-5">
+            <div className="px-5 py-4">
               {!specialRes?.champion ? (
-                <p className="text-center text-muted-foreground py-4">Los resultados especiales aún no han sido ingresados</p>
+                <p className="text-sm text-[#9D9491] text-center py-4">Resultados especiales aún no ingresados</p>
               ) : (
                 <div className="space-y-3">
                   {[
-                    { label: '🏆 Campeón', pred: specialPred?.champion, real: specialRes?.champion, pts: specialPred?.champion_points },
-                    { label: '🥈 Subcampeón', pred: specialPred?.runner_up, real: specialRes?.runner_up, pts: specialPred?.runner_up_points },
-                    { label: '⚽ Goleador', pred: specialPred?.top_scorer, real: specialRes?.top_scorer, pts: specialPred?.top_scorer_points },
-                    { label: '⭐ Jug. Revelación', pred: specialPred?.revelation_player, real: specialRes?.revelation_player, pts: specialPred?.revelation_player_points },
-                    { label: '🌟 Sel. Revelación', pred: specialPred?.revelation_team, real: specialRes?.revelation_team, pts: specialPred?.revelation_team_points },
+                    { label: 'Campeón', pred: specialPred?.champion, real: specialRes?.champion, pts: specialPred?.champion_points },
+                    { label: 'Subcampeón', pred: specialPred?.runner_up, real: specialRes?.runner_up, pts: specialPred?.runner_up_points },
+                    { label: 'Goleador', pred: specialPred?.top_scorer, real: specialRes?.top_scorer, pts: specialPred?.top_scorer_points },
+                    { label: 'Jug. Revelación', pred: specialPred?.revelation_player, real: specialRes?.revelation_player, pts: specialPred?.revelation_player_points },
+                    { label: 'Sel. Revelación', pred: specialPred?.revelation_team, real: specialRes?.revelation_team, pts: specialPred?.revelation_team_points },
                   ].map(item => (
-                    <div key={item.label} className="flex items-center justify-between border border-[#e8d5c0] rounded-xl p-3">
+                    <div key={item.label} className="flex items-center justify-between py-2 border-b border-[#F5F4F2] last:border-0">
                       <div>
-                        <div className="text-xs text-muted-foreground">{item.label}</div>
-                        <div className="font-bold text-sm text-[#8B1538]">{item.real ? `${getFlag(item.real)} ${item.real}` : '—'}</div>
-                        {item.pred && <div className="text-xs text-muted-foreground">Tu pronóstico: {item.pred}</div>}
+                        <div className="text-xs text-[#9D9491] uppercase tracking-wider">{item.label}</div>
+                        <div className="font-medium text-sm text-[#1A1614] mt-0.5">{item.real ? `${getFlag(item.real)} ${item.real}` : '—'}</div>
+                        {item.pred && <div className="text-xs text-[#9D9491]">Tu pronóstico: {item.pred}</div>}
                       </div>
                       {item.pts !== undefined && (
-                        <Badge className={item.pts > 0 ? 'bg-green-600' : 'bg-gray-300 text-gray-700'}>{item.pts}pts</Badge>
+                        <span className={`text-sm font-semibold ${item.pts > 0 ? 'text-green-600' : 'text-[#9D9491]'}`}>
+                          {item.pts > 0 ? `+${item.pts}` : item.pts}
+                        </span>
                       )}
                     </div>
                   ))}
