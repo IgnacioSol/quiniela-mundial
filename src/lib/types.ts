@@ -39,14 +39,16 @@ export interface SpecialPrediction {
   user_id: string
   champion: string | null
   runner_up: string | null
-  top_scorer: string | null
-  revelation_player: string | null
-  revelation_team: string | null
+  top_scorer: string | null          // Bota de Oro
+  golden_ball: string | null         // Balón de Oro
+  golden_glove: string | null        // Guante de Oro
+  revelation_player: string | null   // Mejor Jugador Joven
   champion_points: number
   runner_up_points: number
   top_scorer_points: number
+  golden_ball_points: number
+  golden_glove_points: number
   revelation_player_points: number
-  revelation_team_points: number
   created_at: string
 }
 
@@ -55,8 +57,9 @@ export interface SpecialResults {
   champion: string | null
   runner_up: string | null
   top_scorer: string | null
+  golden_ball: string | null
+  golden_glove: string | null
   revelation_player: string | null
-  revelation_team: string | null
   updated_at: string
 }
 
@@ -67,6 +70,8 @@ export interface ScoringConfig {
   champion_points: number
   runner_up_points: number
   top_scorer_points: number
+  golden_ball_points: number
+  golden_glove_points: number
   revelation_player_points: number
   revelation_team_points: number
 }
