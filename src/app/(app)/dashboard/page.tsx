@@ -33,7 +33,7 @@ async function getLeaderboard(supabase: Awaited<ReturnType<typeof createClient>>
   return (profiles || []).map(profile => {
     const matchPoints = (predictions || []).filter((p: any) => p.user_id === profile.id).reduce((s: number, p: any) => s + (p.points_earned || 0), 0)
     const sp = (specials || []).find((s: any) => s.user_id === profile.id)
-    const specialPoints = sp ? (sp.champion_points + sp.runner_up_points + sp.top_scorer_points + (sp.golden_ball_points || 0) + (sp.golden_glove_points || 0) + sp.revelation_player_points) : 0
+    const specialPoints = sp ? ((sp.champion_points || 0) + (sp.runner_up_points || 0) + (sp.top_scorer_points || 0) + (sp.golden_ball_points || 0) + (sp.golden_glove_points || 0) + (sp.revelation_player_points || 0)) : 0
     const bonus = profile.bonus_points || 0
     return { ...profile, match_points: matchPoints, special_points: specialPoints, total_points: matchPoints + specialPoints + bonus }
   }).sort((a, b) => b.total_points - a.total_points)

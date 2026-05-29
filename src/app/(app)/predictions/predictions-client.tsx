@@ -99,7 +99,7 @@ export default function PredictionsClient({ matches, predictions, deadlines, spe
   const [activeTab, setActiveTab] = useState<Tab>('groups')
   const [localPreds, setLocalPreds] = useState<Record<number, { home: string; away: string }>>(() => {
     const map: Record<number, { home: string; away: string }> = {}
-    predictions.forEach(p => { map[p.match_id] = { home: String(p.predicted_home), away: String(p.predicted_away) } })
+    predictions.filter(p => p.predicted_home !== -1).forEach(p => { map[p.match_id] = { home: String(p.predicted_home), away: String(p.predicted_away) } })
     return map
   })
   const [special, setSpecial] = useState({
@@ -156,7 +156,9 @@ export default function PredictionsClient({ matches, predictions, deadlines, spe
   async function deletePrediction(matchId: number) {
     setDeleting(matchId)
     const supabase = createClient()
-    await supabase.from('predictions').delete().eq('user_id', userId).eq('match_id', matchId)
+    await supabase.from('predictions').update({
+      predicted_home: -1, predicted_away: -1, points_earned: 0,
+    }).eq('user_id', userId).eq('match_id', matchId)
     setLocalPreds(p => { const copy = { ...p }; delete copy[matchId]; return copy })
     setSavedPredIds(s => { const copy = new Set(s); copy.delete(matchId); return copy })
     setDeleting(null)
