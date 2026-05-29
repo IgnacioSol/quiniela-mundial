@@ -113,6 +113,7 @@ export default function PredictionsClient({ matches, predictions, deadlines, spe
   const [saving, setSaving] = useState<number | null>(null)
   const [saved, setSaved] = useState<number | null>(null)
   const [deleting, setDeleting] = useState<number | null>(null)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
   const [savedPredIds, setSavedPredIds] = useState<Set<number>>(
     () => new Set(predictions.filter(p => p.predicted_home !== -1).map(p => p.match_id))
   )
@@ -155,10 +156,16 @@ export default function PredictionsClient({ matches, predictions, deadlines, spe
 
   async function deletePrediction(matchId: number) {
     setDeleting(matchId)
+    setDeleteError(null)
     const supabase = createClient()
-    await supabase.from('predictions').update({
+    const { error } = await supabase.from('predictions').update({
       predicted_home: -1, predicted_away: -1, points_earned: 0,
     }).eq('user_id', userId).eq('match_id', matchId)
+    if (error) {
+      setDeleteError(error.message)
+      setDeleting(null)
+      return
+    }
     setLocalPreds(p => { const copy = { ...p }; delete copy[matchId]; return copy })
     setSavedPredIds(s => { const copy = new Set(s); copy.delete(matchId); return copy })
     setDeleting(null)
@@ -284,6 +291,13 @@ export default function PredictionsClient({ matches, predictions, deadlines, spe
   return (
     <div className="space-y-5 py-2">
       <h1 className="text-xl font-semibold text-[#1A1614] tracking-tight">Pronósticos</h1>
+
+      {deleteError && (
+        <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-100 rounded-xl">
+          <AlertTriangle className="w-4 h-4 text-red-500 mt-0.5 shrink-0" strokeWidth={2} />
+          <p className="text-sm text-red-700">Error al borrar: {deleteError}</p>
+        </div>
+      )}
 
       {upcomingDeadline && (
         <div className="flex items-start gap-3 p-4 bg-orange-50 border border-orange-100 rounded-xl">
