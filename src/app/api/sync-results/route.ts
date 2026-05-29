@@ -159,10 +159,37 @@ export async function GET(request: Request) {
     }
   }
 
+  // Sync top scorers
+  let scorersUpdated = 0
+  try {
+    const scorersRes = await fetch('https://api.football-data.org/v4/competitions/WC/scorers?limit=30', {
+      headers: { 'X-Auth-Token': apiKey },
+      next: { revalidate: 0 },
+    })
+    if (scorersRes.ok) {
+      const { scorers: apiScorers } = await scorersRes.json()
+      for (const s of apiScorers ?? []) {
+        const teamSpanish = TEAM_MAP[s.team?.name] ?? s.team?.name
+        if (!teamSpanish || !s.player?.id || !s.player?.name) continue
+        await supabase.from('scorers').upsert({
+          id: s.player.id,
+          player_name: s.player.name,
+          team: teamSpanish,
+          goals: s.goals ?? 0,
+          assists: s.assists ?? 0,
+          penalties: s.penalties ?? 0,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'id' })
+        scorersUpdated++
+      }
+    }
+  } catch (_) {}
+
   return NextResponse.json({
     ok: true,
     matchesUpdated,
     predictionsUpdated,
+    scorersUpdated,
     errors: errors.length > 0 ? errors : undefined,
     timestamp: new Date().toISOString(),
   })

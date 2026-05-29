@@ -5,13 +5,14 @@ import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { Profile } from '@/lib/types'
 import { cn } from '@/lib/utils'
-import { Trophy, TrendingUp, PenLine, BarChart3, Settings, LogOut } from 'lucide-react'
+import { Trophy, TrendingUp, PenLine, BarChart3, Globe, Settings, LogOut } from 'lucide-react'
 
 const navLinks = [
   { href: '/dashboard', label: 'Ranking', icon: Trophy },
   { href: '/evolution', label: 'Evolución', icon: TrendingUp },
   { href: '/predictions', label: 'Pronósticos', icon: PenLine },
   { href: '/results', label: 'Resultados', icon: BarChart3 },
+  { href: '/explore', label: 'Explorar', icon: Globe },
 ]
 
 export default function Navbar({ profile, pendingCount }: { profile: Profile; pendingCount: number }) {

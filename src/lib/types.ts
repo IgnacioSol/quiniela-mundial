@@ -83,6 +83,16 @@ export interface PhaseDeadline {
   is_locked: boolean
 }
 
+export interface Scorer {
+  id: number
+  player_name: string
+  team: string
+  goals: number
+  assists: number
+  penalties: number
+  updated_at: string
+}
+
 export type Database = {
   public: {
     Tables: {
